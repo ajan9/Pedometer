@@ -239,6 +239,8 @@ class MainActivity : AppCompatActivity() {
         stdFilter[lag - 1] = stats.standardDeviation
         stats.clear()
         peakCount += LAG_SIZE
+        var detected = false
+        var highPeak = false
         for (i in lag until inputs.size) {
             this.plotGraph(abs(inputs[i] - avgFilter[i - 1]), readingCount, rawXSeries)
             this.plotGraph(threshold * stdFilter[i - 1], readingCount, rawYSeries)
@@ -247,8 +249,13 @@ class MainActivity : AppCompatActivity() {
                 //this is a signal (i.e. peak), determine if it is a positive or negative signal
                 if (inputs[i] > avgFilter[i - 1]) {
                     signals[i] = 1
+                    if(inputs[i] > 3.5) highPeak = true
                     if (inputs[i] > 1.7 && inputs[i] < 3.5) {
-                        peaksDetected += 1
+                        //only 1 peak can be detected in a window of 20 values
+                        if(!detected){
+                            detected = true
+                            peaksDetected += 1
+                        }
                         peakSeries.appendData(DataPoint(peakCount.toDouble(), 1.0), true, 20000)
                     } else {
                         peakSeries.appendData(DataPoint(peakCount.toDouble(), 0.0), true, 20000)
@@ -274,6 +281,8 @@ class MainActivity : AppCompatActivity() {
             stdFilter[i] = stats.standardDeviation
 
         }
+        //if too high peak is deteceted, remove deteceted peak (false positive)
+        if(highPeak && detected) peaksDetected-=1
         return peaksDetected
     }
 
