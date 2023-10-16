@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -13,6 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import com.example.pedometer.StepCounter.OnFinishedProcessingListener
 import com.example.pedometer.StepCounter.OnStepUpdateListener
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
@@ -100,6 +105,36 @@ class MainActivity : AppCompatActivity() {
     private val accelerometerEventListener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             stepCounter!!.processSample(event.timestamp, event.values)
+            try {
+                val file: File = File(
+                    Environment.getExternalStorageDirectory()
+                        .toString() + File.separator
+                            + "Download" //folder name
+                            + File.separator
+                            + "acc.csv"
+                )
+                // if file doesnt exists, then create it
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                val fw = FileWriter(file.absoluteFile, true)
+                val bw = BufferedWriter(fw)
+
+                val time = event.timestamp
+
+                bw.write(event.values[0].toString())
+                bw.write(",")
+                bw.write(event.values[1].toString())
+                bw.write(",")
+                bw.write(event.values[2].toString())
+                bw.write(",")
+                bw.write(time.toString())
+                bw.write("\n")
+
+                bw.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}

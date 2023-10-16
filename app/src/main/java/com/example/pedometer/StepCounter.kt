@@ -125,7 +125,7 @@ class StepCounter(
         if (active) {
             //Signal that this is the end of the data stream. This is a special data point that says 'end of stream.'
             active = false
-            val dp = DataPoint(0f, 0f)
+            val dp = DataPoint(0f, 0f, 0f)
             dp.setEos(true)
             rawData!!.add(dp)
         }
@@ -168,10 +168,9 @@ class StepCounter(
                 magnitude += m * m
             }
             magnitude = sqrt(magnitude.toDouble()).toFloat()
-            rawData!!.add(DataPoint(time, magnitude))
-            write(DataPoint(time, magnitude), "raw")
-            Log.d("andreaaa", magnitude.toString())
-            Log.d("andreaaa", time.toString())
+            val new_dp = DataPoint(time, magnitude, magnitude)
+            rawData!!.add(new_dp)
+            write(new_dp, "raw")
         }
     }
 
@@ -191,7 +190,7 @@ class StepCounter(
                 val fw = FileWriter(file.absoluteFile, true)
                 val bw = BufferedWriter(fw)
 
-                val time = data.getTime() / 1000000f
+                val time = data.getTime() / 1000000
 
                 bw.write(data.getMagnitude().toString())
                 bw.write(",")

@@ -38,8 +38,10 @@ class ScoringStage(
 
                     // Calculate score and append to the output window.
                     val score = scorePeak(window)
-                    outputQueue?.add(DataPoint(window[WINDOW_SIZE / 2].getTime(), score))
-                    write(DataPoint(window[WINDOW_SIZE / 2].getTime(), score), "scoring")
+                    val midpoint = window.size / 2
+                    val new_dp = DataPoint(window[WINDOW_SIZE / 2].getTime(), score, window[midpoint].getOldMagnitude())
+                    outputQueue?.add(new_dp)
+                    write(new_dp, "scoring")
                     // Pop out the oldest point.
                     window.removeAt(0)
                 }

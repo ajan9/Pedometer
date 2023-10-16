@@ -49,9 +49,10 @@ class PostProcessStage(
 
                     // If the time difference exceeds the threshold, we have a confirmed step
                     if (dp!!.getTime() - current!!.getTime() > timeThreshold) {
+                        current?.let { write(it, "step")
                         current = dp
                         newStepInterface.incrementSteps()
-                        current?.let { write(it, "step") }
+                         }
                     } else {
                         // Keep the point with the largest magnitude.
                         if (dp!!.getMagnitude() > current!!.getMagnitude()) {
@@ -80,7 +81,7 @@ class PostProcessStage(
             val fw = FileWriter(file.absoluteFile, true)
             val bw = BufferedWriter(fw)
 
-            bw.write(data.getMagnitude().toString())
+            bw.write(data.getOldMagnitude().toString())
             bw.write(",")
             bw.write(data.getTime().toString())
             bw.write("\n")

@@ -47,7 +47,7 @@ class FilterStage(
                     for (i in 0 until FILTER_LENGTH) {
                         sum += window[i].getMagnitude() * filterCoefficients[i]
                     }
-                    val new_dp = DataPoint(window[FILTER_LENGTH / 2].getTime(), sum / filter_sum)
+                    val new_dp = DataPoint(window[FILTER_LENGTH / 2].getTime(), sum / filter_sum, sum/filter_sum)
                     outputQueue?.add(new_dp)
                     write(new_dp, "filtered")
                     window.removeAt(0)

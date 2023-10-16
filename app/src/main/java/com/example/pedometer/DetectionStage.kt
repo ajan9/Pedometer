@@ -1,6 +1,7 @@
 package com.example.pedometer
 
 import android.os.Environment
+import android.util.Log
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -22,7 +23,7 @@ class DetectionStage(
     /*
           Section for defining parameters.
        */
-    private val threshold = 1.2f
+    private val threshold = 1.4f
     override fun run() {
         active = true
         while (active) {
@@ -68,8 +69,11 @@ class DetectionStage(
                 if (count > 15) {
                     if (dp!!.getMagnitude() - mean > std * threshold) {
                         // This is a peak
-                        outputQueue?.add(DataPoint(dp!!.getTime(), dp!!.getMagnitude()))
-                        write(DataPoint(dp!!.getTime(), dp!!.getMagnitude()), "detection")
+                        Log.d("andrea", (std*threshold).toString())
+                        Log.d("jannnn", (dp!!.getMagnitude() - mean).toString())
+                        val new_dp = DataPoint(dp!!.getTime(), dp!!.getMagnitude(), dp!!.getOldMagnitude())
+                        outputQueue?.add(new_dp)
+                        write(new_dp, "detection")
                     }
                 }
                 dp = null
@@ -93,7 +97,7 @@ class DetectionStage(
             val fw = FileWriter(file.absoluteFile, true)
             val bw = BufferedWriter(fw)
 
-            bw.write(data.getMagnitude().toString())
+            bw.write(data.getOldMagnitude().toString())
             bw.write(",")
             bw.write(data.getTime().toString())
             bw.write("\n")

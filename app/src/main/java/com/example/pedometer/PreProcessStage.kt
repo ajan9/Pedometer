@@ -86,7 +86,7 @@ class PreProcessStage(
         val dt = dp2.getTime() - dp1.getTime()
         val dv = dp2.getMagnitude() - dp1.getMagnitude()
         val mag = dv / dt * (interpTime - dp1.getTime()) + dp1.getMagnitude()
-        return DataPoint(interpTime, mag)
+        return DataPoint(interpTime, mag, mag)
     }
 
     private fun write(data: DataPoint, file: String){
