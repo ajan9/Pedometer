@@ -1,10 +1,13 @@
 package com.example.pedometer
 
 import android.os.Environment
+import android.util.Log
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 /**
@@ -35,13 +38,12 @@ class ScoringStage(
                 }
                 window.add(dp!!)
                 if (window.size == WINDOW_SIZE) {
-
                     // Calculate score and append to the output window.
                     val score = scorePeak(window)
                     val midpoint = window.size / 2
                     val new_dp = DataPoint(window[WINDOW_SIZE / 2].getTime(), score, window[midpoint].getOldMagnitude())
                     outputQueue?.add(new_dp)
-                    write(new_dp, "scoring")
+                    //write(new_dp, "scoring")
                     // Pop out the oldest point.
                     window.removeAt(0)
                 }

@@ -6,7 +6,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -14,10 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import com.example.pedometer.StepCounter.OnFinishedProcessingListener
 import com.example.pedometer.StepCounter.OnStepUpdateListener
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -69,8 +65,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        val context: Context = this
-
         sensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
@@ -105,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     private val accelerometerEventListener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             stepCounter!!.processSample(event.timestamp, event.values)
-            try {
+           /* try {
                 val file: File = File(
                     Environment.getExternalStorageDirectory()
                         .toString() + File.separator
@@ -134,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                 bw.close()
             } catch (e: IOException) {
                 e.printStackTrace()
-            }
+            }*/
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}

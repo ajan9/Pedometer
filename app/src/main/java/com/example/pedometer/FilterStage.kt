@@ -33,8 +33,6 @@ class FilterStage(
                 dp = inputQueue.removeAt(0)
             }
             if (dp != null) {
-
-
                 // Special handling for final data point.
                 if (dp!!.getEos()) {
                     active = false
@@ -52,10 +50,12 @@ class FilterStage(
                     write(new_dp, "filtered")
                     window.removeAt(0)
                 }
+
                 dp = null
             }
         }
     }
+
     private fun write(data: DataPoint, file: String){
         try {
             val file: File = File(

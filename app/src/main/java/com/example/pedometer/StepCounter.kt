@@ -56,10 +56,12 @@ class StepCounter(
     private var smoothData: MutableList<DataPoint>? = null
     private var peakScoreData: MutableList<DataPoint>? = null
     private var peakData: MutableList<DataPoint>? = null
+    private var stepsData: MutableList<DataPoint>? = null
     private val callbacks: ArrayList<OnStepUpdateListener>
     private val newStepCallback: OnNewStepDetected
     private val eodCallback: OnEndOfData
     private var finishCallback: OnFinishedProcessingListener? = null
+    private var startTime = -1f
 
     /**
      * [Constructor for the StepCounter module.]
@@ -97,6 +99,7 @@ class StepCounter(
         smoothData = Collections.synchronizedList(ArrayList())
         peakScoreData = Collections.synchronizedList(ArrayList())
         peakData = Collections.synchronizedList(ArrayList())
+        stepsData = Collections.synchronizedList(ArrayList())
     }
 
     /**
@@ -110,11 +113,8 @@ class StepCounter(
             Thread(PreProcessStage(rawData!!, ppData)).start()
             Thread(FilterStage(ppData, smoothData)).start()
             Thread(ScoringStage(smoothData, peakScoreData)).start()
-            Thread(DetectionStage(peakScoreData,
-                peakData
-            )).start()
+            Thread(DetectionStage(peakScoreData, peakData)).start()
             Thread(PostProcessStage(peakData, newStepCallback, eodCallback)).start()
-
         }
     }
 
@@ -125,6 +125,7 @@ class StepCounter(
         if (active) {
             //Signal that this is the end of the data stream. This is a special data point that says 'end of stream.'
             active = false
+
             val dp = DataPoint(0f, 0f, 0f)
             dp.setEos(true)
             rawData!!.add(dp)
@@ -170,7 +171,10 @@ class StepCounter(
             magnitude = sqrt(magnitude.toDouble()).toFloat()
             val new_dp = DataPoint(time, magnitude, magnitude)
             rawData!!.add(new_dp)
-            write(new_dp, "raw")
+            if (startTime == -1f) {
+                startTime = new_dp.getTime()
+            }
+            //write(new_dp, "raw")
         }
     }
 
@@ -190,7 +194,7 @@ class StepCounter(
                 val fw = FileWriter(file.absoluteFile, true)
                 val bw = BufferedWriter(fw)
 
-                val time = data.getTime() / 1000000
+                val time = (data.getTime() - startTime) / 1000000f
 
                 bw.write(data.getMagnitude().toString())
                 bw.write(",")

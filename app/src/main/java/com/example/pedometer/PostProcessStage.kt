@@ -1,10 +1,12 @@
 package com.example.pedometer
 
 import android.os.Environment
+import android.util.Log
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import kotlin.math.abs
 
 class PostProcessStage(
     private val inputQueue: MutableList<DataPoint>?,
@@ -13,6 +15,8 @@ class PostProcessStage(
 ) :
     Runnable {
     private var current: DataPoint? = null
+    private var last2: DataPoint? = null
+    private var last1: DataPoint? = null
     private var dp: DataPoint? = null
     private var active = false
 
@@ -20,6 +24,8 @@ class PostProcessStage(
           Section for parameter definitions
        */
     private val timeThreshold = 200
+    private val threshold = 10.1f
+    private var similarityThreshold = -5f
 
     interface OnNewStepDetected {
         fun incrementSteps()
@@ -45,14 +51,19 @@ class PostProcessStage(
                 // First point handler.
                 if (current == null) {
                     current = dp
+                    last2 = dp
+                    last1 = dp
                 } else {
-
                     // If the time difference exceeds the threshold, we have a confirmed step
                     if (dp!!.getTime() - current!!.getTime() > timeThreshold) {
-                        current?.let { write(it, "step")
-                        current = dp
-                        newStepInterface.incrementSteps()
-                         }
+                        last2 = last1
+                        last1 = current
+                        val similarity = calculateSimilarity(dp!!, last2!!) // Izračunajte sličnost između trenutnog dp i prethodnog current
+                        if (similarity >= similarityThreshold) {
+                            current?.let { write(it, "step")}
+                            newStepInterface.incrementSteps()
+                            current = dp
+                        }
                     } else {
                         // Keep the point with the largest magnitude.
                         if (dp!!.getMagnitude() > current!!.getMagnitude()) {
@@ -63,6 +74,13 @@ class PostProcessStage(
                 dp = null
             }
         }
+    }
+
+    private fun calculateSimilarity(dp: DataPoint, last2: DataPoint): Float {
+        if (dp.getOldMagnitude() < threshold && dp.getOldMagnitude() > 9.1f) {
+            return Float.NEGATIVE_INFINITY
+        }
+        return -abs(last2.getOldMagnitude() - dp.getOldMagnitude())
     }
 
     private fun write(data: DataPoint, file: String){

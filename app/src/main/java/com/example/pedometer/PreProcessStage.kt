@@ -24,6 +24,7 @@ class PreProcessStage(
     private var startTime = -1f
     private var active = false
 
+
     override fun run() {
         active = true
         while (active) {
@@ -48,7 +49,10 @@ class PreProcessStage(
                     startTime = dp!!.getTime()
                 }
                 dp!!.setTime(scaleTime(dp!!.getTime()))
+                //write(dp!!, "raw")
                 window.add(dp!!)
+
+
                 dp = null
             }
 
@@ -67,17 +71,16 @@ class PreProcessStage(
                     if (time1 <= interpTime && interpTime < time2) {
                         val interpolated = linearInterpolate(window[0], window[1], interpTime)
                         outputQueue?.add(interpolated)
-                        write(interpolated, "interpolated")
+                        //write(interpolated, "interpolated")
                         interpolationCount += 1
                     }
                 }
-
                 // Remove the oldest element in the list.
                 window.removeAt(0)
             }
+
         }
     }
-
     private fun scaleTime(ogTime: Float): Float {
         return (ogTime - startTime) / timeScalingFactor
     }

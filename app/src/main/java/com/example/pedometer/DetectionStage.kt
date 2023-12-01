@@ -23,7 +23,7 @@ class DetectionStage(
     /*
           Section for defining parameters.
        */
-    private val threshold = 1.4f
+    private val threshold = 1.2f
     override fun run() {
         active = true
         while (active) {
@@ -69,8 +69,6 @@ class DetectionStage(
                 if (count > 15) {
                     if (dp!!.getMagnitude() - mean > std * threshold) {
                         // This is a peak
-                        Log.d("andrea", (std*threshold).toString())
-                        Log.d("jannnn", (dp!!.getMagnitude() - mean).toString())
                         val new_dp = DataPoint(dp!!.getTime(), dp!!.getMagnitude(), dp!!.getOldMagnitude())
                         outputQueue?.add(new_dp)
                         write(new_dp, "detection")
@@ -81,30 +79,31 @@ class DetectionStage(
         }
     }
 
-    private fun write(data: DataPoint, file: String){
-        try {
-            val file: File = File(
-                Environment.getExternalStorageDirectory()
-                    .toString() + File.separator
-                        + "Download" //folder name
-                        + File.separator
-                        + "$file.csv"
-            )
-            // if file doesnt exists, then create it
-            if (!file.exists()) {
-                file.createNewFile()
+        fun write(data: DataPoint, file: String) {
+            try {
+                val file: File = File(
+                    Environment.getExternalStorageDirectory()
+                        .toString() + File.separator
+                            + "Download" //folder name
+                            + File.separator
+                            + "$file.csv"
+                )
+                // if file doesnt exists, then create it
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
+                val fw = FileWriter(file.absoluteFile, true)
+                val bw = BufferedWriter(fw)
+
+                bw.write(data.getOldMagnitude().toString())
+                bw.write(",")
+                bw.write(data.getTime().toString())
+                bw.write("\n")
+
+                bw.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
-            val fw = FileWriter(file.absoluteFile, true)
-            val bw = BufferedWriter(fw)
-
-            bw.write(data.getOldMagnitude().toString())
-            bw.write(",")
-            bw.write(data.getTime().toString())
-            bw.write("\n")
-
-            bw.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
-    }
+
 }
